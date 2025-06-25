@@ -9,6 +9,36 @@ import time
 import os
 from flask_cors import CORS
 
+# Import configuration
+try:
+    from config import *
+except ImportError:
+    # Fallback configuration if config.py is not available
+    SERVER_HOST = '0.0.0.0'
+    SERVER_PORT = 12001
+    DEBUG_MODE = True
+    DASHBOARD_TITLE = "Financial Assets Dashboard"
+    UPDATE_INTERVAL_SECONDS = 20
+    CURRENT_PRICES = {
+        'Gold': 3200, 'Silver': 37, 'TSLA': 280,
+        'Bitcoin': 105000, 'Ethereum': 5800, 'XRP': 1.25
+    }
+    CHART_COLORS = {
+        'Gold': '#FFD700', 'Silver': '#C0C0C0', 'Gold_Silver_Ratio': '#B87333',
+        'TSLA': '#E31937', 'Bitcoin': '#F7931A', 'Ethereum': '#627EEA',
+        'BTC_ETH_Ratio': '#8A2BE2', 'XRP': '#23292F'
+    }
+    VOLATILITY_PARAMS = {
+        'Gold': {'volatility': 0.008, 'mean_reversion': 0.02},
+        'Silver': {'volatility': 0.015, 'mean_reversion': 0.03},
+        'TSLA': {'volatility': 0.025, 'mean_reversion': 0.01},
+        'Bitcoin': {'volatility': 0.03, 'mean_reversion': 0.015},
+        'Ethereum': {'volatility': 0.035, 'mean_reversion': 0.02},
+        'XRP': {'volatility': 0.025, 'mean_reversion': 0.02}
+    }
+    HISTORICAL_DAYS = 30
+    DATA_FREQUENCY = 'h'
+
 # Create assets directory if it doesn't exist
 os.makedirs('assets', exist_ok=True)
 
@@ -20,21 +50,16 @@ server = app.server
 CORS(server)  # Enable CORS for all routes
 
 # Set the title of the dashboard
-app.title = "Financial Assets Dashboard"
-
-# Current market prices (approximate as of June 2025)
-CURRENT_PRICES = {
-    'Gold': 3200,      # USD per ounce
-    'Silver': 37,      # USD per ounce
-    'TSLA': 280,       # USD per share
-    'Bitcoin': 105000, # USD per BTC
-    'Ethereum': 5800,  # USD per ETH
-    'XRP': 1.25        # USD per XRP
-}
+app.title = DASHBOARD_TITLE
 
 # Function to generate mock data for assets
-def generate_mock_data(asset_name, days=30, freq='h'):
+def generate_mock_data(asset_name, days=None, freq=None):
     """Generate realistic mock data for financial assets with mean reversion"""
+    if days is None:
+        days = HISTORICAL_DAYS
+    if freq is None:
+        freq = DATA_FREQUENCY
+        
     end_date = datetime.datetime.now()
     start_date = end_date - datetime.timedelta(days=days)
     
@@ -43,30 +68,10 @@ def generate_mock_data(asset_name, days=30, freq='h'):
     n = len(dates)
     
     # Set parameters based on asset
-    if asset_name == 'Gold':
-        current_price = CURRENT_PRICES['Gold']
-        volatility = 0.008
-        mean_reversion = 0.02
-    elif asset_name == 'Silver':
-        current_price = CURRENT_PRICES['Silver']
-        volatility = 0.015
-        mean_reversion = 0.03
-    elif asset_name == 'TSLA':
-        current_price = CURRENT_PRICES['TSLA']
-        volatility = 0.025
-        mean_reversion = 0.01
-    elif asset_name == 'Bitcoin':
-        current_price = CURRENT_PRICES['Bitcoin']
-        volatility = 0.03
-        mean_reversion = 0.015
-    elif asset_name == 'Ethereum':
-        current_price = CURRENT_PRICES['Ethereum']
-        volatility = 0.035
-        mean_reversion = 0.02
-    elif asset_name == 'XRP':
-        current_price = CURRENT_PRICES['XRP']
-        volatility = 0.025
-        mean_reversion = 0.02
+    if asset_name in CURRENT_PRICES and asset_name in VOLATILITY_PARAMS:
+        current_price = CURRENT_PRICES[asset_name]
+        volatility = VOLATILITY_PARAMS[asset_name]['volatility']
+        mean_reversion = VOLATILITY_PARAMS[asset_name]['mean_reversion']
     else:
         current_price = 100
         volatility = 0.01
@@ -168,7 +173,7 @@ def create_chart(df, title, color='#1f77b4'):
 app.layout = html.Div([
     # Header
     html.Div([
-        html.H1("Financial Assets Dashboard", className="dashboard-title"),
+        html.H1(DASHBOARD_TITLE, className="dashboard-title"),
         html.Div([
             html.Span("Last Updated: ", className="update-label"),
             html.Span(id="update-time", className="update-time"),
@@ -214,7 +219,7 @@ app.layout = html.Div([
     # Interval component for updates
     dcc.Interval(
         id='interval-component',
-        interval=20*1000,  # in milliseconds (20 seconds)
+        interval=UPDATE_INTERVAL_SECONDS*1000,  # in milliseconds
         n_intervals=0
     )
 ])
@@ -249,15 +254,15 @@ def update_charts(n):
         btc_eth_ratio = create_ratio_data(btc_df, eth_df, 'Bitcoin', 'Ethereum')
         
         # Create charts
-        gold_chart = create_chart(gold_df, 'Spot Gold (per oz)', '#FFD700')
-        silver_chart = create_chart(silver_df, 'Spot Silver (per oz)', '#C0C0C0')
-        gold_silver_ratio_chart = create_chart(gold_silver_ratio, 'Gold/Silver Ratio', '#B87333')
-        tsla_chart = create_chart(tsla_df, 'TSLA Stock', '#E31937')
+        gold_chart = create_chart(gold_df, 'Spot Gold (per oz)', CHART_COLORS['Gold'])
+        silver_chart = create_chart(silver_df, 'Spot Silver (per oz)', CHART_COLORS['Silver'])
+        gold_silver_ratio_chart = create_chart(gold_silver_ratio, 'Gold/Silver Ratio', CHART_COLORS['Gold_Silver_Ratio'])
+        tsla_chart = create_chart(tsla_df, 'TSLA Stock', CHART_COLORS['TSLA'])
         
-        btc_chart = create_chart(btc_df, 'Bitcoin (USD)', '#F7931A')
-        eth_chart = create_chart(eth_df, 'Ethereum (USD)', '#627EEA')
-        btc_eth_ratio_chart = create_chart(btc_eth_ratio, 'BTC/ETH Ratio', '#8A2BE2')
-        xrp_chart = create_chart(xrp_df, 'XRP (USD)', '#23292F')
+        btc_chart = create_chart(btc_df, 'Bitcoin (USD)', CHART_COLORS['Bitcoin'])
+        eth_chart = create_chart(eth_df, 'Ethereum (USD)', CHART_COLORS['Ethereum'])
+        btc_eth_ratio_chart = create_chart(btc_eth_ratio, 'BTC/ETH Ratio', CHART_COLORS['BTC_ETH_Ratio'])
+        xrp_chart = create_chart(xrp_df, 'XRP (USD)', CHART_COLORS['XRP'])
         
         # Update time
         update_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -277,4 +282,4 @@ def update_charts(n):
 
 # Run the app
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=12001)
+    app.run(debug=DEBUG_MODE, host=SERVER_HOST, port=SERVER_PORT)
