@@ -84,22 +84,24 @@ def generate_mock_data(asset_name, days=None, freq=None):
         mean_reversion = 0.01
     
     # Generate price series with mean reversion
-    prices = [current_price * (0.9 + 0.2 * np.random.random())]  # Start near current price
+    prices = [current_price * (0.95 + 0.1 * np.random.random())]  # Start near current price
     
     for i in range(1, n):
-        # Mean reversion component
-        mean_reversion_component = mean_reversion * (current_price - prices[-1])
-        # Random component
-        random_component = volatility * prices[-1] * np.random.normal()
-        # New price
-        new_price = prices[-1] * (1 + mean_reversion_component + random_component)
-        # Ensure price doesn't go negative
-        new_price = max(new_price, 0.001 * current_price)
+        # Mean reversion component (much smaller to prevent exponential growth)
+        mean_reversion_component = mean_reversion * (current_price - prices[-1]) / current_price
+        # Random component (smaller volatility)
+        random_component = volatility * np.random.normal()
+        # New price (additive rather than multiplicative to prevent explosion)
+        price_change = mean_reversion_component + random_component
+        new_price = prices[-1] * (1 + price_change)
+        # Ensure price stays within reasonable bounds
+        new_price = max(new_price, 0.1 * current_price)
+        new_price = min(new_price, 10 * current_price)
         prices.append(new_price)
     
     # Ensure the last price is close to the current market price
     if len(prices) > 0:
-        prices[-1] = current_price * (0.995 + 0.01 * np.random.random())
+        prices[-1] = current_price * (0.98 + 0.04 * np.random.random())
     
     # Create DataFrame
     df = pd.DataFrame({
@@ -118,15 +120,25 @@ def create_ratio_data(df1, df2, name1, name2):
         return pd.DataFrame({'Date': [], 'Price': []})
     
     try:
-        # Ensure both dataframes have the same dates
-        merged = pd.merge(df1, df2, on='Date', suffixes=('_1', '_2'))
-        if merged.empty:
+        # Use the shorter dataframe's dates to ensure alignment
+        min_len = min(len(df1), len(df2))
+        if min_len == 0:
             return pd.DataFrame({'Date': [], 'Price': []})
             
-        merged['Ratio'] = merged['Price_1'] / merged['Price_2']
-        merged = merged[['Date', 'Ratio']]
-        merged.columns = ['Date', 'Price']  # Rename for consistency
-        return merged
+        # Take the first min_len rows from each dataframe
+        df1_subset = df1.head(min_len).copy()
+        df2_subset = df2.head(min_len).copy()
+        
+        # Calculate ratio using the prices directly
+        ratio_values = df1_subset['Price'].values / df2_subset['Price'].values
+        
+        # Create result dataframe
+        result = pd.DataFrame({
+            'Date': df1_subset['Date'].values,
+            'Price': ratio_values
+        })
+        
+        return result
     except Exception as e:
         print(f"Error creating ratio data for {name1}/{name2}: {e}")
         return pd.DataFrame({'Date': [], 'Price': []})
@@ -186,7 +198,18 @@ def create_chart(df, title, color='#1f77b4'):
             gridcolor='rgba(230,230,230,0.8)',
             showline=True,
             linecolor='rgba(0,0,0,0.2)',
-            linewidth=1
+            linewidth=1,
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=1, label="1h", step="hour", stepmode="backward"),
+                    dict(count=6, label="6h", step="hour", stepmode="backward"),
+                    dict(count=1, label="1d", step="day", stepmode="backward"),
+                    dict(count=7, label="7d", step="day", stepmode="backward"),
+                    dict(step="all")
+                ])
+            ),
+            rangeslider=dict(visible=False),
+            type='date'
         ),
         yaxis=dict(
             showgrid=True,
