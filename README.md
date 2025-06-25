@@ -41,11 +41,18 @@ pip install -r requirements.txt
 ```
 
 3. Run the application:
+
+**Option A: Using the launcher script (recommended)**
+```bash
+python run_dashboard.py
+```
+
+**Option B: Direct execution**
 ```bash
 python financial_dashboard.py
 ```
 
-4. Open your browser and navigate to `http://localhost:12000`
+4. Open your browser and navigate to `http://localhost:12001`
 
 ## Usage
 
@@ -58,9 +65,22 @@ The dashboard will automatically start displaying financial data with the follow
 
 ## Configuration
 
-### Customizing Assets
-To modify the assets being tracked, edit the `CURRENT_PRICES` dictionary in `financial_dashboard.py`:
+The dashboard can be easily customized by editing the `config.py` file:
 
+### Server Settings
+```python
+SERVER_HOST = '0.0.0.0'
+SERVER_PORT = 12001
+DEBUG_MODE = True
+```
+
+### Dashboard Settings
+```python
+DASHBOARD_TITLE = "Financial Assets Dashboard"
+UPDATE_INTERVAL_SECONDS = 20  # How often to refresh data
+```
+
+### Asset Prices
 ```python
 CURRENT_PRICES = {
     'Gold': 3200,      # USD per ounce
@@ -72,15 +92,25 @@ CURRENT_PRICES = {
 }
 ```
 
-### Adjusting Update Frequency
-Change the update interval by modifying the `interval` parameter in the `dcc.Interval` component:
-
+### Chart Colors
 ```python
-dcc.Interval(
-    id='interval-component',
-    interval=20*1000,  # in milliseconds (20 seconds)
-    n_intervals=0
-)
+CHART_COLORS = {
+    'Gold': '#FFD700',
+    'Silver': '#C0C0C0',
+    'TSLA': '#E31937',
+    'Bitcoin': '#F7931A',
+    'Ethereum': '#627EEA',
+    'XRP': '#23292F'
+}
+```
+
+### Data Generation Parameters
+```python
+VOLATILITY_PARAMS = {
+    'Gold': {'volatility': 0.008, 'mean_reversion': 0.02},
+    'Silver': {'volatility': 0.015, 'mean_reversion': 0.03},
+    # ... more assets
+}
 ```
 
 ## Technical Details
@@ -110,10 +140,14 @@ The application uses sophisticated mock data generation that includes:
 ```
 financial-dashboard/
 ├── financial_dashboard.py    # Main application file
+├── config.py                # Configuration settings
+├── run_dashboard.py         # Launcher script
 ├── assets/
 │   └── style.css            # Custom styling
 ├── requirements.txt         # Python dependencies
-└── README.md               # This file
+├── README.md               # This file
+├── LICENSE                 # MIT License
+└── .gitignore             # Git ignore rules
 ```
 
 ### Adding New Assets
