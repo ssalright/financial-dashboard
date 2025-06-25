@@ -12,14 +12,14 @@ DEBUG_MODE = True
 DASHBOARD_TITLE = "Financial Assets Dashboard"
 UPDATE_INTERVAL_SECONDS = 20  # How often to refresh data
 
-# Asset Configuration - Current market prices (approximate)
+# Asset Configuration - Current market prices (as of June 25, 2025 11:34am NY timezone)
 CURRENT_PRICES = {
-    'Gold': 3200,      # USD per ounce
-    'Silver': 37,      # USD per ounce
-    'TSLA': 280,       # USD per share
-    'Bitcoin': 105000, # USD per BTC
-    'Ethereum': 5800,  # USD per ETH
-    'XRP': 1.25        # USD per XRP
+    'Gold': 3330,      # USD per ounce
+    'Silver': 35.9,    # USD per ounce
+    'TSLA': 324,       # USD per share
+    'Bitcoin': 107000, # USD per BTC
+    'Ethereum': 2400,  # USD per ETH
+    'XRP': 2.18        # USD per XRP
 }
 
 # Chart Configuration
