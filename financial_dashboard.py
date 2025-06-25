@@ -67,6 +67,12 @@ def generate_mock_data(asset_name, days=None, freq=None):
     dates = pd.date_range(start=start_date, end=end_date, freq=freq)
     n = len(dates)
     
+    # Ensure we have at least some data points
+    if n == 0:
+        # Fallback: create at least 24 hourly points
+        dates = pd.date_range(start=start_date, periods=24, freq='h')
+        n = len(dates)
+    
     # Set parameters based on asset
     if asset_name in CURRENT_PRICES and asset_name in VOLATILITY_PARAMS:
         current_price = CURRENT_PRICES[asset_name]
@@ -78,7 +84,7 @@ def generate_mock_data(asset_name, days=None, freq=None):
         mean_reversion = 0.01
     
     # Generate price series with mean reversion
-    prices = [current_price * 0.9 + current_price * 0.1 * np.random.normal()]  # Start near current price
+    prices = [current_price * (0.9 + 0.2 * np.random.random())]  # Start near current price
     
     for i in range(1, n):
         # Mean reversion component
@@ -92,11 +98,12 @@ def generate_mock_data(asset_name, days=None, freq=None):
         prices.append(new_price)
     
     # Ensure the last price is close to the current market price
-    prices[-1] = current_price * (0.995 + 0.01 * np.random.random())
+    if len(prices) > 0:
+        prices[-1] = current_price * (0.995 + 0.01 * np.random.random())
     
     # Create DataFrame
     df = pd.DataFrame({
-        'Date': dates,
+        'Date': dates[:len(prices)],  # Ensure dates and prices have same length
         'Price': prices
     })
     
@@ -105,38 +112,62 @@ def generate_mock_data(asset_name, days=None, freq=None):
 # Function to create ratio data
 def create_ratio_data(df1, df2, name1, name2):
     """Create ratio data from two dataframes"""
-    # Ensure both dataframes have the same dates
-    merged = pd.merge(df1, df2, on='Date', suffixes=('_1', '_2'))
-    merged['Ratio'] = merged['Price_1'] / merged['Price_2']
-    merged = merged[['Date', 'Ratio']]
-    merged.columns = ['Date', 'Price']  # Rename for consistency
-    return merged
+    # Check if either dataframe is empty
+    if df1.empty or df2.empty or len(df1) == 0 or len(df2) == 0:
+        # Return empty dataframe with correct structure
+        return pd.DataFrame({'Date': [], 'Price': []})
+    
+    try:
+        # Ensure both dataframes have the same dates
+        merged = pd.merge(df1, df2, on='Date', suffixes=('_1', '_2'))
+        if merged.empty:
+            return pd.DataFrame({'Date': [], 'Price': []})
+            
+        merged['Ratio'] = merged['Price_1'] / merged['Price_2']
+        merged = merged[['Date', 'Ratio']]
+        merged.columns = ['Date', 'Price']  # Rename for consistency
+        return merged
+    except Exception as e:
+        print(f"Error creating ratio data for {name1}/{name2}: {e}")
+        return pd.DataFrame({'Date': [], 'Price': []})
 
 # Function to create a chart
 def create_chart(df, title, color='#1f77b4'):
     """Create a plotly chart from dataframe"""
     fig = go.Figure()
     
-    fig.add_trace(go.Scatter(
-        x=df['Date'],
-        y=df['Price'],
-        mode='lines',
-        name=title,
-        line=dict(color=color, width=2),
-        hovertemplate='%{y:.2f}<extra></extra>'
-    ))
-    
-    # Add current price annotation
-    current_price = df['Price'].iloc[-1]
-    fig.add_annotation(
-        x=df['Date'].iloc[-1],
-        y=current_price,
-        text=f"${current_price:.2f}" if current_price > 1 else f"${current_price:.4f}",
-        showarrow=True,
-        arrowhead=1,
-        ax=50,
-        ay=-40
-    )
+    # Check if dataframe is empty
+    if df.empty or len(df) == 0:
+        # Create empty chart with message
+        fig.add_annotation(
+            x=0.5, y=0.5,
+            text="No data available",
+            showarrow=False,
+            xref="paper", yref="paper",
+            font=dict(size=16, color="gray")
+        )
+    else:
+        fig.add_trace(go.Scatter(
+            x=df['Date'],
+            y=df['Price'],
+            mode='lines',
+            name=title,
+            line=dict(color=color, width=2),
+            hovertemplate='%{y:.2f}<extra></extra>'
+        ))
+        
+        # Add current price annotation if data exists
+        if len(df) > 0:
+            current_price = df['Price'].iloc[-1]
+            fig.add_annotation(
+                x=df['Date'].iloc[-1],
+                y=current_price,
+                text=f"${current_price:.2f}" if current_price > 1 else f"${current_price:.4f}",
+                showarrow=True,
+                arrowhead=1,
+                ax=50,
+                ay=-40
+            )
     
     # Set layout
     fig.update_layout(
