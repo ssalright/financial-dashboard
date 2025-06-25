@@ -134,4 +134,65 @@ body {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Timeframe Selector Styles */
+.timeframe-container {
+    background-color: #34495e;
+    padding: 10px 20px;
+    border-bottom: 1px solid #2c3e50;
+}
+
+.timeframe-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.timeframe-label {
+    color: white;
+    font-weight: 500;
+    margin-right: 10px;
+}
+
+.timeframe-btn {
+    background-color: #5a6c7d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 50px;
+}
+
+.timeframe-btn:hover {
+    background-color: #4a5a6b;
+    transform: translateY(-1px);
+}
+
+.timeframe-btn.active {
+    background-color: #3498db;
+    color: white;
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+}
+
+.timeframe-btn.active:hover {
+    background-color: #2980b9;
+}

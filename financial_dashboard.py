@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html
+from dash import dcc, html, callback_context
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 import pandas as pd
@@ -53,12 +53,21 @@ CORS(server)  # Enable CORS for all routes
 app.title = DASHBOARD_TITLE
 
 # Function to generate mock data for assets
-def generate_mock_data(asset_name, days=None, freq=None):
+def generate_mock_data(asset_name, timeframe='3d'):
     """Generate realistic mock data for financial assets with mean reversion"""
-    if days is None:
-        days = HISTORICAL_DAYS
-    if freq is None:
-        freq = DATA_FREQUENCY
+    # Map timeframes to days and frequency
+    timeframe_config = {
+        '3d': {'days': 3, 'freq': '15min'},
+        '2w': {'days': 14, 'freq': '1h'},
+        '3m': {'days': 90, 'freq': '4h'},
+        '1yr': {'days': 365, 'freq': '1d'},
+        '5y': {'days': 1825, 'freq': '1w'},
+        '10y': {'days': 3650, 'freq': '1w'}
+    }
+    
+    config = timeframe_config.get(timeframe, timeframe_config['3d'])
+    days = config['days']
+    freq = config['freq']
         
     end_date = datetime.datetime.now()
     start_date = end_date - datetime.timedelta(days=days)
@@ -199,16 +208,6 @@ def create_chart(df, title, color='#1f77b4'):
             showline=True,
             linecolor='rgba(0,0,0,0.2)',
             linewidth=1,
-            rangeselector=dict(
-                buttons=list([
-                    dict(count=1, label="1h", step="hour", stepmode="backward"),
-                    dict(count=6, label="6h", step="hour", stepmode="backward"),
-                    dict(count=1, label="1d", step="day", stepmode="backward"),
-                    dict(count=7, label="7d", step="day", stepmode="backward"),
-                    dict(step="all")
-                ])
-            ),
-            rangeslider=dict(visible=False),
             type='date'
         ),
         yaxis=dict(
@@ -234,6 +233,19 @@ app.layout = html.Div([
             html.Span(id="update-status", className="update-status")
         ], className="update-info")
     ], className="header"),
+    
+    # Timeframe selector
+    html.Div([
+        html.Div([
+            html.Span("Timeframe: ", className="timeframe-label"),
+            html.Button("3d", id="btn-3d", className="timeframe-btn active", n_clicks=0),
+            html.Button("2w", id="btn-2w", className="timeframe-btn", n_clicks=0),
+            html.Button("3m", id="btn-3m", className="timeframe-btn", n_clicks=0),
+            html.Button("1yr", id="btn-1yr", className="timeframe-btn", n_clicks=0),
+            html.Button("5y", id="btn-5y", className="timeframe-btn", n_clicks=0),
+            html.Button("10y", id="btn-10y", className="timeframe-btn", n_clicks=0)
+        ], className="timeframe-controls")
+    ], className="timeframe-container"),
     
     # Main content
     html.Div([
@@ -270,6 +282,9 @@ app.layout = html.Div([
         ], className="chart-row")
     ], className="dashboard-content"),
     
+    # Hidden div to store selected timeframe
+    html.Div(id='selected-timeframe', children='3d', style={'display': 'none'}),
+    
     # Interval component for updates
     dcc.Interval(
         id='interval-component',
@@ -277,6 +292,58 @@ app.layout = html.Div([
         n_intervals=0
     )
 ])
+
+# Callback to handle timeframe selection
+@app.callback(
+    [Output('selected-timeframe', 'children'),
+     Output('btn-3d', 'className'),
+     Output('btn-2w', 'className'),
+     Output('btn-3m', 'className'),
+     Output('btn-1yr', 'className'),
+     Output('btn-5y', 'className'),
+     Output('btn-10y', 'className')],
+    [Input('btn-3d', 'n_clicks'),
+     Input('btn-2w', 'n_clicks'),
+     Input('btn-3m', 'n_clicks'),
+     Input('btn-1yr', 'n_clicks'),
+     Input('btn-5y', 'n_clicks'),
+     Input('btn-10y', 'n_clicks')]
+)
+def update_timeframe(btn_3d, btn_2w, btn_3m, btn_1yr, btn_5y, btn_10y):
+    """Update selected timeframe based on button clicks"""
+    ctx = callback_context
+    
+    if not ctx.triggered:
+        # Default to 3d
+        return '3d', 'timeframe-btn active', 'timeframe-btn', 'timeframe-btn', 'timeframe-btn', 'timeframe-btn', 'timeframe-btn'
+    
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    # Reset all button classes
+    classes = ['timeframe-btn'] * 6
+    
+    if button_id == 'btn-3d':
+        classes[0] = 'timeframe-btn active'
+        return '3d', *classes
+    elif button_id == 'btn-2w':
+        classes[1] = 'timeframe-btn active'
+        return '2w', *classes
+    elif button_id == 'btn-3m':
+        classes[2] = 'timeframe-btn active'
+        return '3m', *classes
+    elif button_id == 'btn-1yr':
+        classes[3] = 'timeframe-btn active'
+        return '1yr', *classes
+    elif button_id == 'btn-5y':
+        classes[4] = 'timeframe-btn active'
+        return '5y', *classes
+    elif button_id == 'btn-10y':
+        classes[5] = 'timeframe-btn active'
+        return '10y', *classes
+    
+    # Default fallback
+    classes[0] = 'timeframe-btn active'
+    return '3d', *classes
 
 # Callback to update all charts
 @app.callback(
@@ -291,17 +358,18 @@ app.layout = html.Div([
      Output('update-time', 'children'),
      Output('update-status', 'children'),
      Output('update-status', 'className')],
-    [Input('interval-component', 'n_intervals')]
+    [Input('interval-component', 'n_intervals'),
+     Input('selected-timeframe', 'children')]
 )
-def update_charts(n):
+def update_charts(n, timeframe):
     try:
-        # Generate data for each asset
-        gold_df = generate_mock_data('Gold')
-        silver_df = generate_mock_data('Silver')
-        tsla_df = generate_mock_data('TSLA')
-        btc_df = generate_mock_data('Bitcoin')
-        eth_df = generate_mock_data('Ethereum')
-        xrp_df = generate_mock_data('XRP')
+        # Generate data for each asset with selected timeframe
+        gold_df = generate_mock_data('Gold', timeframe)
+        silver_df = generate_mock_data('Silver', timeframe)
+        tsla_df = generate_mock_data('TSLA', timeframe)
+        btc_df = generate_mock_data('Bitcoin', timeframe)
+        eth_df = generate_mock_data('Ethereum', timeframe)
+        xrp_df = generate_mock_data('XRP', timeframe)
         
         # Create ratio dataframes
         gold_silver_ratio = create_ratio_data(gold_df, silver_df, 'Gold', 'Silver')
