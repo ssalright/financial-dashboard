@@ -61,8 +61,8 @@ def generate_mock_data(asset_name, timeframe='3d'):
         '2w': {'days': 14, 'freq': '1h'},
         '3m': {'days': 90, 'freq': '4h'},
         '1yr': {'days': 365, 'freq': '1d'},
-        '5y': {'days': 1825, 'freq': '1w'},
-        '10y': {'days': 3650, 'freq': '1w'}
+        '5y': {'days': 1825, 'freq': '1W'},
+        '10y': {'days': 3650, 'freq': '1W'}
     }
     
     config = timeframe_config.get(timeframe, timeframe_config['3d'])

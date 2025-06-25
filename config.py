@@ -5,7 +5,7 @@ Modify these settings to customize the dashboard behavior.
 
 # Server Configuration
 SERVER_HOST = '0.0.0.0'
-SERVER_PORT = 12001
+SERVER_PORT = 8888
 DEBUG_MODE = True
 
 # Dashboard Configuration
