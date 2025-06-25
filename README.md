@@ -1,179 +1,227 @@
-# Financial Dashboard
+# Financial Assets Dashboard
 
-A real-time financial assets dashboard built with Dash and Plotly, displaying live price data for various financial instruments including precious metals, stocks, and cryptocurrencies.
+A comprehensive real-time financial dashboard built with Python Dash for tracking and analyzing multiple asset classes including precious metals, stocks, and cryptocurrencies.
 
-## Features
+![Dashboard Preview](https://img.shields.io/badge/Status-Active-green) ![Python](https://img.shields.io/badge/Python-3.8+-blue) ![Dash](https://img.shields.io/badge/Dash-2.0+-orange)
 
-- **Real-time Price Tracking**: Monitor current prices for Gold, Silver, Tesla (TSLA), Bitcoin, Ethereum, and XRP
-- **Interactive Charts**: Responsive charts with hover details and zoom functionality
-- **Asset Ratios**: Track important ratios like Gold/Silver and BTC/ETH
-- **Auto-refresh**: Dashboard updates every 20 seconds with new data
-- **Responsive Design**: Mobile-friendly layout that adapts to different screen sizes
-- **Modern UI**: Clean, professional interface with smooth animations
+## 🚀 Features
 
-## Assets Tracked
+### Multi-Asset Tracking
+- **Precious Metals**: Gold, Silver
+- **Stocks**: Tesla (TSLA)
+- **Cryptocurrencies**: Bitcoin, Ethereum, XRP
 
-### Precious Metals
-- **Gold** - Spot price per ounce
-- **Silver** - Spot price per ounce
-- **Gold/Silver Ratio** - Traditional precious metals ratio
+### Interactive Time Periods
+- **3 Days** (15-minute intervals) - Default
+- **2 Weeks** (1-hour intervals)
+- **3 Months** (4-hour intervals)
+- **1 Year** (daily intervals)
+- **5 Years** (weekly intervals)
+- **10 Years** (weekly intervals)
 
-### Stocks
-- **Tesla (TSLA)** - Stock price
+### Advanced Analytics
+- **Price Charts**: Real-time price movements with trend analysis
+- **Ratio Analysis**: Asset correlation and relative performance
+- **Portfolio Metrics**: Comprehensive performance indicators
+- **Risk Assessment**: Volatility and risk metrics
 
-### Cryptocurrencies
-- **Bitcoin (BTC)** - Price in USD
-- **Ethereum (ETH)** - Price in USD
-- **XRP** - Price in USD
-- **BTC/ETH Ratio** - Cryptocurrency ratio
+### User Experience
+- **Global Timeframe Selector**: Single control for all charts
+- **Responsive Design**: Works on desktop and mobile
+- **Real-time Updates**: Live data refresh every 30 seconds
+- **Interactive Charts**: Zoom, pan, and hover for detailed information
 
-## Installation
+## 📊 Current Market Prices (June 25, 2025)
 
-1. Clone the repository:
-```bash
-git clone https://github.com/ssalright/financial-dashboard.git
-cd financial-dashboard
-```
+| Asset | Price | Symbol |
+|-------|-------|--------|
+| Gold | $3,330/oz | XAU |
+| Silver | $35.90/oz | XAG |
+| Tesla | $324.00 | TSLA |
+| Bitcoin | $107,000 | BTC |
+| Ethereum | $2,400 | ETH |
+| XRP | $2.18 | XRP |
 
-2. Install the required dependencies:
-```bash
-pip install -r requirements.txt
-```
+## 🛠️ Installation
 
-3. Run the application:
+### Prerequisites
+- Python 3.8 or higher
+- pip package manager
 
-**Option A: Using the launcher script (recommended)**
-```bash
-python run_dashboard.py
-```
+### Quick Start
 
-**Option B: Direct execution**
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/ssalright/financial-dashboard.git
+   cd financial-dashboard
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run the dashboard**
+   ```bash
+   python run_dashboard.py
+   ```
+
+4. **Access the dashboard**
+   - Open your browser to `http://localhost:8888`
+   - The dashboard will automatically load with 3-day timeframe selected
+
+### Alternative Launch Methods
+
+**Direct Python execution:**
 ```bash
 python financial_dashboard.py
 ```
 
-4. Open your browser and navigate to `http://localhost:12001`
-
-## Usage
-
-The dashboard will automatically start displaying financial data with the following features:
-
-- **Live Updates**: Data refreshes every 20 seconds
-- **Interactive Charts**: Click and drag to zoom, hover for detailed values
-- **Current Prices**: Latest prices are annotated on each chart
-- **Status Indicator**: Shows last update time and status in the header
-
-## Configuration
-
-The dashboard can be easily customized by editing the `config.py` file:
-
-### Server Settings
-```python
-SERVER_HOST = '0.0.0.0'
-SERVER_PORT = 12001
-DEBUG_MODE = True
+**Custom port:**
+```bash
+# Edit config.py to change SERVER_PORT
+python financial_dashboard.py
 ```
 
-### Dashboard Settings
-```python
-DASHBOARD_TITLE = "Financial Assets Dashboard"
-UPDATE_INTERVAL_SECONDS = 20  # How often to refresh data
-```
+## 📁 Project Structure
 
-### Asset Prices
-```python
-CURRENT_PRICES = {
-    'Gold': 3200,      # USD per ounce
-    'Silver': 37,      # USD per ounce
-    'TSLA': 280,       # USD per share
-    'Bitcoin': 105000, # USD per BTC
-    'Ethereum': 5800,  # USD per ETH
-    'XRP': 1.25        # USD per XRP
-}
-```
-
-### Chart Colors
-```python
-CHART_COLORS = {
-    'Gold': '#FFD700',
-    'Silver': '#C0C0C0',
-    'TSLA': '#E31937',
-    'Bitcoin': '#F7931A',
-    'Ethereum': '#627EEA',
-    'XRP': '#23292F'
-}
-```
-
-### Data Generation Parameters
-```python
-VOLATILITY_PARAMS = {
-    'Gold': {'volatility': 0.008, 'mean_reversion': 0.02},
-    'Silver': {'volatility': 0.015, 'mean_reversion': 0.03},
-    # ... more assets
-}
-```
-
-## Technical Details
-
-### Architecture
-- **Frontend**: Dash (React-based) with Plotly charts
-- **Backend**: Flask server with CORS enabled
-- **Data**: Mock data generation with realistic price movements
-- **Styling**: Custom CSS with responsive design
-
-### Data Generation
-The application uses sophisticated mock data generation that includes:
-- Mean reversion modeling
-- Asset-specific volatility parameters
-- Realistic price movements
-- Current market price anchoring
-
-### Performance
-- Efficient data generation and caching
-- Optimized chart rendering
-- Responsive design for various screen sizes
-- Error handling and status reporting
-
-## Development
-
-### Project Structure
 ```
 financial-dashboard/
-├── financial_dashboard.py    # Main application file
+├── financial_dashboard.py    # Main dashboard application
 ├── config.py                # Configuration settings
-├── run_dashboard.py         # Launcher script
-├── assets/
-│   └── style.css            # Custom styling
-├── requirements.txt         # Python dependencies
-├── README.md               # This file
-├── LICENSE                 # MIT License
-└── .gitignore             # Git ignore rules
+├── style.css               # Custom styling
+├── run_dashboard.py        # Launcher script
+├── requirements.txt        # Python dependencies
+├── README.md              # This file
+└── .gitignore            # Git ignore rules
 ```
 
-### Adding New Assets
-1. Add the asset to `CURRENT_PRICES`
-2. Create data generation parameters in `generate_mock_data()`
-3. Add chart creation in the callback function
-4. Update the layout to include the new chart
+## 🚦 Usage
 
-## Contributing
+### Timeframe Selection
+1. Use the buttons in the header to select your desired timeframe
+2. All charts will automatically update to show data for the selected period
+3. The active timeframe button is highlighted in blue
+
+### Chart Interaction
+- **Zoom**: Click and drag to zoom into specific time periods
+- **Pan**: Hold shift and drag to pan across the chart
+- **Hover**: Hover over data points for detailed information
+- **Reset**: Double-click to reset zoom level
+
+### Understanding the Data
+- **Price Charts**: Show absolute price movements over time
+- **Ratio Charts**: Display relative performance between assets
+- **Portfolio Metrics**: Provide comprehensive performance analysis
+
+## ⚙️ Configuration
+
+### Server Settings (`config.py`)
+```python
+SERVER_HOST = '0.0.0.0'      # Server host
+SERVER_PORT = 8888           # Server port
+DEBUG_MODE = True            # Debug mode
+DASHBOARD_TITLE = "Financial Assets Dashboard"
+```
+
+### Asset Configuration
+- **Current Prices**: Updated to June 25, 2025 market values
+- **Volatility Parameters**: Realistic volatility for each asset class
+- **Mean Reversion**: Smart price movement simulation
+
+## 🔧 Technical Details
+
+### Data Generation
+- **Realistic Price Movements**: Uses mean reversion with appropriate volatility
+- **Multiple Timeframes**: Different data frequencies for each time period
+- **Error Handling**: Robust fallback mechanisms for data generation
+- **Performance Optimized**: Efficient data structures and calculations
+
+### Chart Features
+- **Plotly Integration**: Interactive, professional-grade charts
+- **Responsive Layout**: Adapts to different screen sizes
+- **Real-time Updates**: Automatic data refresh
+- **Synchronized Navigation**: All charts update together
+
+### Architecture
+- **Modular Design**: Separated concerns for maintainability
+- **Callback System**: Efficient state management
+- **Error Recovery**: Graceful handling of edge cases
+- **CORS Enabled**: Cross-origin resource sharing support
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+**Port Already in Use**
+```bash
+# Check what's using the port
+netstat -tlnp | grep 8888
+# Or change the port in config.py
+```
+
+**Missing Dependencies**
+```bash
+# Reinstall requirements
+pip install -r requirements.txt --force-reinstall
+```
+
+**Data Loading Issues**
+- Check internet connection for real-time data
+- Verify all dependencies are installed correctly
+- Check console for error messages
+
+### Performance Tips
+- Use shorter timeframes (3d, 2w) for faster loading
+- Close other browser tabs to free up memory
+- Refresh the page if charts become unresponsive
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these steps:
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-feature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/new-feature`)
-5. Create a Pull Request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## License
+### Development Guidelines
+- Follow PEP 8 style guidelines
+- Add comments for complex logic
+- Test all timeframe combinations
+- Ensure responsive design compatibility
 
-This project is open source and available under the [MIT License](LICENSE).
+## 📝 License
 
-## Disclaimer
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-This dashboard uses mock data for demonstration purposes. For production use with real financial data, integrate with actual financial data APIs such as:
-- Alpha Vantage
-- Yahoo Finance API
-- CoinGecko API
-- Financial Modeling Prep
+## 🙏 Acknowledgments
 
-**Important**: This tool is for educational and demonstration purposes only. Do not use this data for actual trading or investment decisions.
+- **Plotly Dash** - For the excellent dashboard framework
+- **Pandas** - For powerful data manipulation capabilities
+- **NumPy** - For efficient numerical computations
+- **Flask-CORS** - For cross-origin resource sharing
+
+## 📞 Support
+
+If you encounter any issues or have questions:
+
+1. Check the [Issues](https://github.com/ssalright/financial-dashboard/issues) page
+2. Create a new issue with detailed description
+3. Include error messages and system information
+
+## 🔮 Future Enhancements
+
+- [ ] Real-time data integration with financial APIs
+- [ ] Additional asset classes (commodities, forex, bonds)
+- [ ] Advanced technical indicators (RSI, MACD, Bollinger Bands)
+- [ ] Portfolio optimization tools
+- [ ] Export functionality (PDF, CSV)
+- [ ] User authentication and personalized dashboards
+- [ ] Mobile app version
+- [ ] Alert system for price movements
+
+---
+
+**Built with ❤️ for financial analysis and data visualization**
